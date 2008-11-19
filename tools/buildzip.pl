@@ -15,39 +15,6 @@ use File::Find; # For find()
 use File::Path; # For rmtree()
 use Cwd 'abs_path';
 use Getopt::Long qw(:config pass_through);	# pass_through so not
-                                                # confused by -DTYPE_STUFF
-
-sub glob_copy {
-    my ($pattern, $destination) = @_;
-    foreach my $path (glob($pattern)) {
-        copy($path, $destination);
-    }
-}
-
-sub glob_move {
-    my ($pattern, $destination) = @_;
-    foreach my $path (glob($pattern)) {
-        move($path, $destination);
-    }
-}
-
-sub glob_unlink {
-    my ($pattern) = @_;
-    foreach my $path (glob($pattern)) {
-        unlink($path);
-    }
-}
-
-sub find_copyfile {
-    my ($pattern, $destination) = @_;
-    return sub {
-        my $path = $_;
-        if ($path =~ $pattern && filesize($path) > 0 && !($path =~ /\.rockbox/)) {
-            copy($path, $destination);
-            chmod(0755, $destination.'/'.$path);
-        }
-    }
-}
 
 my $ROOT="..";
 
@@ -60,6 +27,44 @@ my $target;
 my $archos;
 my $incfonts;
 my $target_id; # passed in, not currently used
+
+# confused by -DTYPE_STUFF
+
+sub glob_copy {
+    my ($pattern, $destination) = @_;
+    print "glob_copy: $pattern -> $destination\n" if $verbose;
+    foreach my $path (glob($pattern)) {
+        copy($path, $destination);
+    }
+}
+
+sub glob_move {
+    my ($pattern, $destination) = @_;
+    print "glob_move: $pattern -> $destination\n" if $verbose;
+    foreach my $path (glob($pattern)) {
+        move($path, $destination);
+    }
+}
+
+sub glob_unlink {
+    my ($pattern) = @_;
+    print "glob_unlink: $pattern\n" if $verbose;
+    foreach my $path (glob($pattern)) {
+        unlink($path);
+    }
+}
+
+sub find_copyfile {
+    my ($pattern, $destination) = @_;
+    print "find_copyfile: $pattern -> $destination\n" if $verbose;
+    return sub {
+        my $path = $_;
+        if ($path =~ $pattern && filesize($path) > 0 && !($path =~ /\.rockbox/)) {
+            copy($path, $destination);
+            chmod(0755, $destination.'/'.$path);
+        }
+    }
+}
 
 # Get options
 GetOptions ( 'r|root=s'		=> \$ROOT,
