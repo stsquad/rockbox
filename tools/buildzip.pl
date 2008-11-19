@@ -27,6 +27,7 @@ my $target;
 my $archos;
 my $incfonts;
 my $target_id; # passed in, not currently used
+my $rockbox_root=".rockbox"; # can be changed for special builds
 
 # confused by -DTYPE_STUFF
 
@@ -59,7 +60,7 @@ sub find_copyfile {
     print "find_copyfile: $pattern -> $destination\n" if $verbose;
     return sub {
         my $path = $_;
-        if ($path =~ $pattern && filesize($path) > 0 && !($path =~ /\.rockbox/)) {
+        if ($path =~ $pattern && filesize($path) > 0 && !($path =~ /$rockbox_root/)) {
             copy($path, $destination);
             chmod(0755, $destination.'/'.$path);
         }
@@ -172,23 +173,25 @@ sub filesize {
 sub buildzip {
     my ($image, $fonts)=@_;
 
+    print "buildzip: image=$image fonts=$fonts\n" if $verbose;
+    
     my ($bitmap, $depth, $icon_w, $icon_h, $recording, $swcodec,
         $remote_depth, $remote_icon_w, $remote_icon_h) = &gettargetinfo();
 
     # print "Bitmap: $bitmap\nDepth: $depth\nSwcodec: $swcodec\n";
 
     # remove old traces
-    rmtree('.rockbox');
+    rmtree('$rockbox_root');
 
-    mkdir ".rockbox", 0777;
+    mkdir "$rockbox_root", 0777;
 
     if(!$bitmap) {
         # always disable fonts on non-bitmap targets
         $fonts = 0;
     }
     if($fonts) {
-        mkdir ".rockbox/fonts", 0777;
-        chdir(".rockbox/fonts");
+        mkdir "$rockbox_root/fonts", 0777;
+        chdir("$rockbox_root/fonts");
         my $cmd = "$ROOT/tools/convbdf -f $ROOT/fonts/*bdf >/dev/null 2>&1";
         print($cmd."\n") if $verbose;
         system($cmd);
@@ -201,46 +204,46 @@ sub buildzip {
     }
 
     # create the file so the database does not try indexing a folder
-    open(IGNORE, ">.rockbox/database.ignore")  || die "can't open database.ignore";
+    open(IGNORE, ">$rockbox_root/database.ignore")  || die "can't open database.ignore";
     close(IGNORE);
     
-    mkdir ".rockbox/langs", 0777;
-    mkdir ".rockbox/rocks", 0777;
-    mkdir ".rockbox/rocks/games", 0777;
-    mkdir ".rockbox/rocks/apps", 0777;
-    mkdir ".rockbox/rocks/demos", 0777;
-    mkdir ".rockbox/rocks/viewers", 0777;
+    mkdir "$rockbox_root/langs", 0777;
+    mkdir "$rockbox_root/rocks", 0777;
+    mkdir "$rockbox_root/rocks/games", 0777;
+    mkdir "$rockbox_root/rocks/apps", 0777;
+    mkdir "$rockbox_root/rocks/demos", 0777;
+    mkdir "$rockbox_root/rocks/viewers", 0777;
 
     if ($recording) {
-        mkdir ".rockbox/recpresets", 0777;
+        mkdir "$rockbox_root/recpresets", 0777;
     }
 
     if($swcodec) {
-        mkdir ".rockbox/eqs", 0777;
+        mkdir "$rockbox_root/eqs", 0777;
 
-        glob_copy("$ROOT/apps/eqs/*.cfg", '.rockbox/eqs/'); # equalizer presets
+        glob_copy("$ROOT/apps/eqs/*.cfg", "$rockbox_root/eqs/"); # equalizer presets
     }
 
-    mkdir ".rockbox/wps", 0777;
-    mkdir ".rockbox/themes", 0777;
+    mkdir "$rockbox_root/wps", 0777;
+    mkdir "$rockbox_root/themes", 0777;
     if ($bitmap) {
-        open(THEME, ">.rockbox/themes/rockbox_default_icons.cfg");
+        open(THEME, ">$rockbox_root/themes/rockbox_default_icons.cfg");
         print THEME <<STOP
 # this config file was auto-generated to make it
 # easy to reset the icons back to default
 iconset: -
 # taken from apps/gui/icon.c
-viewers iconset: /.rockbox/icons/viewers.bmp
+viewers iconset: /$rockbox_root/icons/viewers.bmp
 remote iconset: -
 # taken from apps/gui/icon.c
-remote viewers iconset: /.rockbox/icons/remote_viewers.bmp
+remote viewers iconset: /$rockbox_root/icons/remote_viewers.bmp
 
 STOP
 ;
         close(THEME);
     }
     
-    mkdir ".rockbox/codepages", 0777;
+    mkdir "$rockbox_root/codepages", 0777;
 
     if($bitmap) {
         system("$ROOT/tools/codepages");
@@ -249,29 +252,29 @@ STOP
         system("$ROOT/tools/codepages -m");
     }
 
-    glob_move('*.cp', '.rockbox/codepages/');
+    glob_move('*.cp', "$rockbox_root/codepages/");
 
     if($bitmap) {
-        mkdir ".rockbox/codecs", 0777;
+        mkdir "$rockbox_root/codecs", 0777;
         if($depth > 1) {
-            mkdir ".rockbox/backdrops", 0777;
+            mkdir "$rockbox_root/backdrops", 0777;
         }
 
-        find(find_copyfile(qr/.*\.codec/, abs_path('.rockbox/codecs/')), 'apps/codecs');
+        find(find_copyfile(qr/.*\.codec/, abs_path("$rockbox_root/codecs/")), 'apps/codecs');
 
         # remove directory again if no codec was copied
-        rmdir(".rockbox/codecs");
+        rmdir("$rockbox_root/codecs");
     }
 
-    find(find_copyfile(qr/\.(rock|ovl)/, abs_path('.rockbox/rocks/')), 'apps/plugins');
+    find(find_copyfile(qr/\.(rock|ovl)/, abs_path("$rockbox_root/rocks/")), 'apps/plugins');
 
     open VIEWERS, "$ROOT/apps/plugins/viewers.config" or
         die "can't open viewers.config";
     my @viewers = <VIEWERS>;
     close VIEWERS;
 
-    open VIEWERS, ">.rockbox/viewers.config" or
-        die "can't create .rockbox/viewers.config";
+    open VIEWERS, ">$rockbox_root/viewers.config" or
+        die "can't create $rockbox_root/viewers.config";
 
     foreach my $line (@viewers) {
         if ($line =~ /([^,]*),([^,]*),/) {
@@ -293,24 +296,24 @@ STOP
 
             # print STDERR "$ext $plugin $dir $name $r\n";
 
-            if(-e ".rockbox/rocks/$name") {
+            if(-e "$rockbox_root/rocks/$name") {
                 if($dir ne "rocks") {
                     # target is not 'rocks' but the plugins are always in that
                     # dir at first!
-                    move(".rockbox/rocks/$name", ".rockbox/rocks/$r");
+                    move("$rockbox_root/rocks/$name", "$rockbox_root/rocks/$r");
                 }
                 print VIEWERS $line;
             }
-            elsif(-e ".rockbox/rocks/$r") {
+            elsif(-e "$rockbox_root/rocks/$r") {
                 # in case the same plugin works for multiple extensions, it
                 # was already moved to the viewers dir
                 print VIEWERS $line;
             }
 
-            if(-e ".rockbox/rocks/$oname") {
+            if(-e "$rockbox_root/rocks/$oname") {
                 # if there's an "overlay" file for the .rock, move that as
                 # well
-                move(".rockbox/rocks/$oname", ".rockbox/rocks/$dir");
+                move("$rockbox_root/rocks/$oname", "$rockbox_root/rocks/$dir");
             }
         }
     }
@@ -323,33 +326,33 @@ STOP
     foreach my $line (@rock_targetdirs) {
         if ($line =~ /([^,]*),(.*)/) {
             my ($plugin, $dir)=($1, $2);
-            move(".rockbox/rocks/${plugin}.rock", ".rockbox/rocks/$dir/${plugin}.rock");
+            move("$rockbox_root/rocks/${plugin}.rock", "$rockbox_root/rocks/$dir/${plugin}.rock");
         }
     }
 
     if ($bitmap) {
-        mkdir ".rockbox/icons", 0777;
-        copy("$viewer_bmpdir/viewers.${icon_w}x${icon_h}x$depth.bmp", ".rockbox/icons/viewers.bmp");
+        mkdir "$rockbox_root/icons", 0777;
+        copy("$viewer_bmpdir/viewers.${icon_w}x${icon_h}x$depth.bmp", "$rockbox_root/icons/viewers.bmp");
         if ($remote_depth) {
-            copy("$viewer_bmpdir/remote_viewers.${remote_icon_w}x${remote_icon_h}x$remote_depth.bmp", ".rockbox/icons/remote_viewers.bmp");
+            copy("$viewer_bmpdir/remote_viewers.${remote_icon_w}x${remote_icon_h}x$remote_depth.bmp", "$rockbox_root/icons/remote_viewers.bmp");
         }
     }
 
-    copy("$ROOT/apps/tagnavi.config", ".rockbox/");
-    copy("$ROOT/apps/plugins/disktidy.config", ".rockbox/rocks/apps/");
+    copy("$ROOT/apps/tagnavi.config", "$rockbox_root/");
+    copy("$ROOT/apps/plugins/disktidy.config", "$rockbox_root/rocks/apps/");
 
     if($bitmap) {
-        copy("$ROOT/apps/plugins/sokoban.levels", ".rockbox/rocks/games/sokoban.levels"); # sokoban levels
-        copy("$ROOT/apps/plugins/snake2.levels", ".rockbox/rocks/games/snake2.levels"); # snake2 levels
+        copy("$ROOT/apps/plugins/sokoban.levels", "$rockbox_root/rocks/games/sokoban.levels"); # sokoban levels
+        copy("$ROOT/apps/plugins/snake2.levels", "$rockbox_root/rocks/games/snake2.levels"); # snake2 levels
     }
 
     if($image) {
         # image is blank when this is a simulator
         if( filesize("rockbox.ucl") > 1000 ) {
-            copy("rockbox.ucl", ".rockbox/rockbox.ucl");  # UCL for flashing
+            copy("rockbox.ucl", "$rockbox_root/rockbox.ucl");  # UCL for flashing
         }
         if( filesize("rombox.ucl") > 1000) {
-            copy("rombox.ucl", ".rockbox/rombox.ucl");  # UCL for flashing
+            copy("rombox.ucl", "$rockbox_root/rombox.ucl");  # UCL for flashing
         }
         
         # Check for rombox.target
@@ -358,25 +361,25 @@ STOP
             my $romfile = "rombox.$2";
             if (filesize($romfile) > 1000)
             {
-                copy($romfile, ".rockbox/$romfile");
+                copy($romfile, "$rockbox_root/$romfile");
             }
         }
     }
 
-    mkdir ".rockbox/docs", 0777;
+    mkdir "$rockbox_root/docs", 0777;
     for(("COPYING",
          "LICENSES",
          "KNOWN_ISSUES"
         )) {
-        copy("$ROOT/docs/$_", ".rockbox/docs/$_.txt");
+        copy("$ROOT/docs/$_", "$rockbox_root/docs/$_.txt");
     }
     if ($fonts) {
-        copy("$ROOT/docs/profontdoc.txt", ".rockbox/docs/profontdoc.txt");
+        copy("$ROOT/docs/profontdoc.txt", "$rockbox_root/docs/profontdoc.txt");
     }
     for(("sample.colours",
          "sample.icons"
         )) {
-        copy("$ROOT/docs/$_", ".rockbox/docs/$_");
+        copy("$ROOT/docs/$_", "$rockbox_root/docs/$_");
     }
 
     # Now do the WPS dance
@@ -388,10 +391,10 @@ STOP
     }
 
     # and the info file
-    copy("rockbox-info.txt", ".rockbox/rockbox-info.txt");
+    copy("rockbox-info.txt", "$rockbox_root/rockbox-info.txt");
 
     # copy the already built lng files
-    glob_copy('apps/lang/*lng', '.rockbox/langs/');
+    glob_copy('apps/lang/*lng', "$rockbox_root/langs/");
 
 }
 
@@ -408,7 +411,7 @@ $year+=1900;
 sub runone {
     my ($target, $fonts)=@_;
 
-    # build a full install .rockbox directory
+    # build a full install .rockbox ($rockbox_root) directory
     buildzip($target, $fonts);
 
     unlink($output);
@@ -419,23 +422,23 @@ sub runone {
     }
     if($target && ($target !~ /(mod|ajz|wma)\z/i)) {
         # On some targets, the image goes into .rockbox.
-        copy("$target", ".rockbox/$target");
+        copy("$target", "$rockbox_root/$target");
         undef $target;
     }
 
     if($verbose) {
-        print "$ziptool $output .rockbox $target >/dev/null\n";
+        print "$ziptool $output $rockbox_root $target >/dev/null\n";
     }
 
     if($sim) {
-        system("cp -r .rockbox archos/ >/dev/null");
+        system("cp -r $rockbox_root archos/ >/dev/null");
     }
     else {
-        system("$ziptool $output .rockbox $target >/dev/null");
+        system("$ziptool $output $rockbox_root $target >/dev/null");
     }
 
     # remove the .rockbox afterwards
-    rmtree('.rockbox');
+    rmtree("$rockbox_root");
 };
 
 if(!$exe) {
