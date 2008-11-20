@@ -14,7 +14,7 @@ use File::Copy; # For move() and copy()
 use File::Find; # For find()
 use File::Path; # For rmtree()
 use Cwd 'abs_path';
-use Getopt::Long qw(:config pass_through);	# pass_through so not
+use Getopt::Long qw(:config pass_through);	# pass_through so not confused by -DTYPE_STUFF
 
 my $ROOT="..";
 
@@ -29,7 +29,7 @@ my $incfonts;
 my $target_id; # passed in, not currently used
 my $rockbox_root=".rockbox"; # can be changed for special builds
 
-# confused by -DTYPE_STUFF
+
 
 sub glob_copy {
     my ($pattern, $destination) = @_;
@@ -75,7 +75,9 @@ GetOptions ( 'r|root=s'		=> \$ROOT,
 	     'o|output=s'	=> \$output,
 	     'f|fonts=s'	=> \$incfonts,   # 0 - no fonts, 1 - fonts only 2 - fonts and package
 	     'v|verbose'	=> \$verbose,
-	     's|sim'		=> \$sim );
+	     's|sim'		=> \$sim,
+	     'rockroot=s'       => \$rockbox_root, # If we want to put in a different directory
+    );
 
 ($target, $exe) = @ARGV;
 
@@ -384,7 +386,12 @@ STOP
 
     # Now do the WPS dance
     if(-d "$ROOT/wps") {
-        system("perl $ROOT/wps/wpsbuild.pl -r $ROOT $ROOT/wps/WPSLIST $target");
+	my $wps_build_cmd="perl $ROOT/wps/wpsbuild.pl ";
+	$wps_build_cmd=$wps_build_cmd."-v " if $verbose;
+	$wps_build_cmd=$wps_build_cmd." --rockroot=$rockbox_root -r $ROOT $ROOT/wps/WPSLIST $target";
+	print "wpsbuild: $wps_build_cmd\n" if $verbose;
+        system("$wps_build_cmd");
+	print "wps_build_cmd: done\n" if $verbose;
     }
     else {
         print STDERR "No wps module present, can't do the WPS magic!\n";
