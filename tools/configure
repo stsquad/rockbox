@@ -15,7 +15,7 @@ use_logf="#undef ROCKBOX_HAS_LOGF"
 
 scriptver=`echo '$Revision$' | sed -e 's:\\$::g' -e 's/Revision: //'`
 
-rbdir="/.rockbox"
+rbdir=".rockbox"
 
 #
 # Begin Function Definitions
@@ -2308,7 +2308,7 @@ sed > autoconf.h \
 @have_rtc_alarm@
 
 /* root of Rockbox */
-#define ROCKBOX_DIR "@RBDIR@"
+#define ROCKBOX_DIR "/@RBDIR@"
 
 #endif /* __BUILD_AUTOCONF_H */
 EOF
@@ -2402,6 +2402,7 @@ sed > Makefile \
  -e "s,@VOICETOOLSET@,${voicetoolset},g" \
  -e "s,@LANGS@,${buildlangs},g" \
  -e "s,@USE_ELF@,${USE_ELF},g" \
+ -e "s,@RBDIR@,${rbdir},g" \
 <<EOF
 ## Automatically generated. http://www.rockbox.org/
 
@@ -2464,6 +2465,7 @@ export TTS_ENGINE=@TTS_ENGINE@
 export ENC_OPTS=@ENC_OPTS@
 export ENCODER=@ENCODER@
 export USE_ELF=@USE_ELF@
+export RBDIR=@RBDIR@
 
 include \$(TOOLSDIR)/root.make
 

@@ -185,27 +185,27 @@ tags:
 	$(SILENT)etags -o $(BUILDDIR)/TAGS $(filter-out %.o,$(SRC) $(OTHER_SRC))
 
 fontzip:
-	$(SILENT)$(TOOLSDIR)/buildzip.pl $(VERBOSEOPT) -t \"$(MODELNAME)\" -r "$(ROOTDIR)" -f 1 -o rockbox-fonts.zip $(TARGET) $(BINARY)
+	$(SILENT)$(TOOLSDIR)/buildzip.pl $(VERBOSEOPT) -t \"$(MODELNAME)\" -r "$(ROOTDIR)" --rockroot="$(RBDIR)" -f 1 -o rockbox-fonts.zip $(TARGET) $(BINARY)
 
 zip:
 	$(SILENT)for f in `cat $(BUILDDIR)/apps/features`; do feat="$$feat:$$f" ; done ; \
-	$(TOOLSDIR)/buildzip.pl $(VERBOSEOPT) -t \"$(MODELNAME)$$feat\" -i \"$(TARGET_ID)\"  -r "$(ROOTDIR)" $(TARGET) $(BINARY)
+	$(TOOLSDIR)/buildzip.pl $(VERBOSEOPT) -t \"$(MODELNAME)$$feat\" -i \"$(TARGET_ID)\"  -r "$(ROOTDIR)" --rockroot="$(RBDIR)" $(TARGET) $(BINARY)
 
 mapzip:
 	$(SILENT)find . -name "*.map" | xargs zip rockbox-maps.zip
 
 fullzip:
 	$(SILENT)for f in `cat $(BUILDDIR)/apps/features`; do feat="$$feat:$$f" ; done; \
-	$(TOOLSDIR)/buildzip.pl $(VERBOSEOPT) -t \"$(MODELNAME)$$feat\" -i \"$(TARGET_ID)\"  -r "$(ROOTDIR)" -f 2 -o rockbox-full.zip $(TARGET) $(BINARY)
+	$(TOOLSDIR)/buildzip.pl $(VERBOSEOPT) -t \"$(MODELNAME)$$feat\" -i \"$(TARGET_ID)\"  -r "$(ROOTDIR)" --rockroot="$(RBDIR)" -f 2 -o rockbox-full.zip $(TARGET) $(BINARY)
 
 7zip:
 	$(SILENT)for f in `cat $(BUILDDIR)/apps/features`; do feat="$$feat:$$f" ; done; \
-	$(TOOLSDIR)/buildzip.pl $(VERBOSEOPT) -t \"$(MODELNAME)$$feat\" -i \"$(TARGET_ID)\"  -o "rockbox.7z" -z "7za a -mx=9" -r "$(ROOTDIR)" $(TARGET) $(BINARY)
+	$(TOOLSDIR)/buildzip.pl $(VERBOSEOPT) -t \"$(MODELNAME)$$feat\" -i \"$(TARGET_ID)\"  -o "rockbox.7z" -z "7za a -mx=9" -r "$(ROOTDIR)" --rockroot="$(RBDIR)" $(TARGET) $(BINARY)
 
 tar:
 	$(SILENT)rm -f rockbox.tar
 	$(SILENT)for f in `cat $(BUILDDIR)/apps/features`; do feat="$$feat:$$f" ; done; \
-	$(TOOLSDIR)/buildzip.pl $(VERBOSEOPT) -t \"$(MODELNAME)$$feat\" -i \"$(TARGET_ID)\"  -o "rockbox.tar" -z "tar -cf" -r "$(ROOTDIR)" $(TARGET) $(BINARY)
+	$(TOOLSDIR)/buildzip.pl $(VERBOSEOPT) -t \"$(MODELNAME)$$feat\" -i \"$(TARGET_ID)\"  -o "rockbox.tar" -z "tar -cf" -r "$(ROOTDIR)" --rockroot="$(RBDIR)" $(TARGET) $(BINARY)
 
 bzip2: tar
 	$(SILENT)bzip2 -f9 rockbox.tar
