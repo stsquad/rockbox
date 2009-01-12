@@ -1503,10 +1503,10 @@ int tagtree_enter(struct tree_context* c)
                     break;
                 }
                 c->dirlevel--;
-                /* about to create a new current playlist...
-                 allow user to cancel the operation */
-                if (!warn_on_pl_erase())
-                    break;
+
+		/* maybe save the current playlist */
+		if (!playlist_maybe_save_current())
+		    break;
 
                 if (tagtree_play_folder(c) >= 0)
                     rc = 2;

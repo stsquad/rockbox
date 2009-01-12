@@ -104,11 +104,12 @@ bool ft_play_playlist(char* pathname, char* dirname, char* filename)
 
     splash(0, ID2P(LANG_WAIT));
 
-    /* about to create a new current playlist...
-       allow user to cancel the operation */
-    if (!warn_on_pl_erase())
-        return false;
-
+    /* maybe save the current playlist */
+    if (!playlist_maybe_save_current())
+    {
+	return false;
+    }
+    
     if (playlist_create(dirname, filename) != -1)
     {
         if (global_settings.playlist_shuffle)
@@ -425,11 +426,13 @@ int ft_enter(struct tree_context* c)
 
                 splash(0, ID2P(LANG_WAIT));
 
-                /* about to create a new current playlist...
-                   allow user to cancel the operation */
-                if (!warn_on_pl_erase())
-                    break;
-
+		/* about to create a new current
+		 * playlist... allow user to
+		 * cancel the operation
+		 */
+		if (!playlist_maybe_save_current())
+		    break;
+		    
                 if (global_settings.party_mode && audio_status()) 
                 {
                     playlist_insert_track(NULL, buf,

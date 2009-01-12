@@ -144,7 +144,7 @@ struct directory_search_context {
     int count;
 };
 
-static struct playlist_info current_playlist;
+struct playlist_info current_playlist;
 static char now_playing[MAX_PATH+1];
 
 static void empty_playlist(struct playlist_info* playlist, bool resume);
@@ -3478,6 +3478,7 @@ int playlist_save(struct playlist_info* playlist, char *filename)
 
     return result;
 }
+
 
 /*
  * Search specified directory for tracks and notify via callback.  May be

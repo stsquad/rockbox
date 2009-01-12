@@ -6830,6 +6830,62 @@
   </voice>
 </phrase>
 <phrase>
+  id: LANG_SAVE_CURRENT_PLAYLIST_Q
+  desc: In the potentially save playlist menu
+  user: core
+  <source>
+    *: "Save Current Playlist?"
+  </source>
+  <dest>
+    *: "Save Current Playlist?"
+  </dest>
+  <voice>
+    *: "Save Current Playlist?"
+  </voice>
+</phrase>
+<phrase>
+  id: LANG_SAVE_CURRENT_PLAYLIST_AS
+  desc: In the potentially save playlist menu
+  user: core
+  <source>
+    *: "as '%s'"
+  </source>
+  <dest>
+    *: "as '%s'"
+  </dest>
+  <voice>
+    *: "Save Current Playlist as '%s'"
+  </voice>
+</phrase>
+<phrase>
+  id: LANG_SAVE_CURRENT_PLAYLIST_AS_PROMPT
+  desc: In the potentially save playlist menu
+  user: core
+  <source>
+    *: "as ..."
+  </source>
+  <dest>
+    *: "as ..."
+  </dest>
+  <voice>
+    *: "as ..."
+  </voice>
+</phrase>
+<phrase>
+  id: LANG_DONT_SAVE_CURRENT_PLAYLIST
+  desc: In the potentially save playlist menu
+  user: core
+  <source>
+    *: "No (Changes will be lost)"
+  </source>
+  <dest>
+    *: "No (Changes will be lost)"
+  </dest>
+  <voice>
+    *: "No (Changes will be lost)"
+  </voice>
+</phrase>
+<phrase>
   id: LANG_PLAYLIST_SAVE_COUNT
   desc: splash number of tracks saved
   user: core
@@ -6887,21 +6943,21 @@
 </phrase>
 <phrase>
   id: LANG_WARN_ERASEDYNPLAYLIST_MENU
-  desc: in playlist options menu, option to warn when erasing dynamic playlist
+  desc: in playlist options menu, option to warn when erasing modified playlists
   user: core
   <source>
-    *: "Warn When Erasing Dynamic Playlist"
+    *: "Warn When Erasing Modified Playlist"
   </source>
   <dest>
-    *: "Warn When Erasing Dynamic Playlist"
+    *: "Warn When Erasing Modified Playlist"
   </dest>
   <voice>
-    *: "Warn When Erasing Dynamic Playlist"
+    *: "Warn When Erasing Modified Playlist"
   </voice>
 </phrase>
 <phrase>
-  id: LANG_WARN_ERASEDYNPLAYLIST_PROMPT
-  desc: prompt shown when about to erase a modified dynamic playlist
+  id: LANG_WARN_SAVE_PLAYLIST_PROMPT
+  desc: prompt shown when about to erase a modified playlist
   user: core
   <source>
     *: "Erase dynamic playlist?"
@@ -6911,6 +6967,20 @@
   </dest>
   <voice>
     *: "Erase dynamic playlist?"
+  </voice>
+</phrase>
+<phrase>
+  id: LANG_WARN_ERASEDYNPLAYLIST_CONTINUE
+  desc: option to select if we are happy to continue and erase current playlist
+  user: core
+  <source>
+    *: "Continue"
+  </source>
+  <dest>
+    *: "Continue"
+  </dest>
+  <voice>
+    *: "Continue"
   </voice>
 </phrase>
 <phrase>

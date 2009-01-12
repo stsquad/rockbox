@@ -45,10 +45,6 @@ char *output_dyn_value(char *buf, int buf_size, int value,
  */
 void format_time(char* buf, int buf_size, long t);
 
-/* Ask the user if they really want to erase the current dynamic playlist
- * returns true if the playlist should be replaced */
-bool warn_on_pl_erase(void);
-
 /* Read (up to) a line of text from fd into buffer and return number of bytes
  * read (which may be larger than the number of bytes stored in buffer). If 
  * an error occurs, -1 is returned (and buffer contains whatever could be 
